@@ -1,0 +1,105 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+    "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="eng" lang="eng">
+<head>
+    <link rel="stylesheet" type="text/css" href="styles/main.css" />
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.7.2/jquery.min.js" type="text/javascript"></script>
+    <script type="https://raw.github.com/caleb531/jcanvas/master/builds/5.4/jcanvas.min.js" type="text/javascript"></script>
+
+    <script type="text/javascript">
+    var after_click = 0;
+    var x1,y1,x2,y2,leftxy,rightxy,topxy,bottonxy,dP1P2;
+
+    function crop(img_id, crop_id, x, y, width, height) {
+        $('#'+crop_id).html('<img id="' + crop_id + '_img" src="' +
+            $('#'+img_id).attr('src') + '" style="display:none" />');
+
+        var scale_x = $('#'+crop_id).width() / width;
+        var scale_y = $('#'+crop_id).height() / height;
+
+        $('#'+crop_id).css({
+          position: 'relative',
+          overflow: 'hidden' 
+        });
+
+        $('#'+crop_id + '_img').css({
+          position: 'absolute',
+          display: 'block',
+          left: (-x * scale_x) + 'px',
+          top: (-y * scale_y) + 'px',
+          width: ($('#'+img_id).width() * scale_x) + 'px',
+          height: ($('#'+img_id).height() * scale_y) + 'px'
+    });
+  }
+
+    $(document).ready(function() {
+        var canvas = document.getElementById("myCanvas");
+        var context = canvas.getContext("2d");
+        $('#myCanvas').bind('click', function (ev) {
+            var $img = $(ev.target);
+
+            var offset = $img.offset();
+            var x = ev.clientX - offset.left;
+            var y = ev.clientY - offset.top;
+            if (after_click!=0){
+                if (after_click==1){
+                    x2 = x1;
+                    y2 = y1;
+                }
+                $("#trace").append(x+","+y+","+leftxy+","+bottonxy+","+rightxy+","+topxy+"</br>");
+                if (x>=leftxy && y<=bottonxy && x<=rightxy && y>=topxy){
+                    context.beginPath();
+                    context.moveTo(x2, y2);
+                    context.lineTo(x1, y1);
+                    context.stroke(); 
+                    after_click = 0;
+                    x2=0, y2=0;
+                    return;
+                }
+                context.beginPath();
+                context.moveTo(x2, y2);
+                context.lineTo(x, y);
+                context.stroke(); 
+                //after_click = "";
+                dP1P2 = Math.sqrt((Math.pow((x2-x),2)) + (Math.pow((y2-y),2)));
+                x2 = x;
+                y2 = y;
+                $("#trace").append("x2="+x2+"y2="+y2+"</br>");
+                $("#trace").append("distance between x1,y1 and x2,y2 "+dP1P2+"</br>");
+                after_click++;
+            }else{
+                context.fillStyle="#FF0000";
+                context.fillRect(x-2,y-2,4,4);
+                after_click++;
+                x1= x;
+                y1= y;
+                leftxy= x-10, rightxy= x+10, topxy= y-10, bottonxy= y+10;
+                $("#trace").append("x1="+x1+"y1="+y1+"</br>");
+            }
+
+            //alert('clicked at x: ' + x + ', y: ' + y);
+        });
+    });
+    </script>
+<style type="text/css">
+
+#canvas-wrap canvas { position:absolute; top:0; left:0; z-index:10;}
+#canvas-wrap #overlay { position:absolute; top:0; left:0; width:500px; height:500px;z-index:5; background-color:#7CFC00;}
+#canvas-wrap { position:relative; width:500px; height:500px; z-index:0; background-color:#6495ed;}
+</style>
+</head>
+<body onload="crop('img', 'crop', 160, 140, 60, 60)">
+<div id="canvas-wrap">
+    <canvas id="myCanvas" width="500" height="500"></canvas>
+    <div id="overlay"></div>
+</div>
+
+<div id="trace"></div>
+
+<div id="crop" style="width:80px; height:80px; margin-bottom:20px;"></div>
+
+<p>Cropped from this one</p>
+<img id="img" src="test.jpg" />
+
+</body>
+</html>
