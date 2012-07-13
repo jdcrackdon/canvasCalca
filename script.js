@@ -23,27 +23,34 @@ $(document).ready(function() {
 		}
 		return;
 	}
-	function getSlope (a1,a2,b1,b2) {
-		var result;
-		var ua_t=(b2.x-b1.x)*(a1.y-b1.y)-(b2.y-b1.y)*(a1.x-b1.x);
-		var ub_t=(a2.x-a1.x)*(a1.y-b1.y)-(a2.y-a1.y)*(a1.x-b1.x);
-		var u_b=(b2.y-b1.y)*(a2.x-a1.x)-(b2.x-b1.x)*(a2.y-a1.y);
-		if(u_b!==0){
-			var ua=ua_t/u_b;
-			var ub=ub_t/u_b;
-			if(0<=ua&&ua<=1&&0<=ub&&ub<=1){
-				return false;
+	function getSlope (point) {
+		var b2 = point;
+		alert(shape.length);
+		for (var i = shape.length-2; i >= 0; i++) {
+			alert(i);
+			var a1 = shape[i-1];
+			var b1 = shape[i];
+			var a2 = shape[shape.length];
+			var ua_t=(b2.x-b1.x)*(a1.y-b1.y)-(b2.y-b1.y)*(a1.x-b1.x);
+			var ub_t=(a2.x-a1.x)*(a1.y-b1.y)-(a2.y-a1.y)*(a1.x-b1.x);
+			var u_b=(b2.y-b1.y)*(a2.x-a1.x)-(b2.x-b1.x)*(a2.y-a1.y);
+
+			if(u_b!==0){
+				var ua=ua_t/u_b;
+				var ub=ub_t/u_b;
+				if(0<=ua&&ua<=1&&0<=ub&&ub<=1){
+					return false;
+				}else{
+					return true;
+				}
 			}else{
-				return true;
+				if(ua_t===0||ub_t===0){
+					alert("Coincident");
+				}else{
+					alert("Paralelos");
+				}
 			}
-		}else{
-			if(ua_t===0||ub_t===0){
-				alert("Coincident");
-			}else{
-				alert("Paralelos");
-			}
-		}
-		return result;
+		};
 	}
 
 	function moveClickedPoint (argument) {
@@ -68,7 +75,9 @@ $(document).ready(function() {
         var y = ev.clientY - offset.top;
 
         if (after_click>0){
-            shape[after_click] = new point(x,y,after_click);
+        	shape[after_click] = new point(x,y,after_click);
+
+        	getSlope(point(x,y,after_click));
 
             is_closedInFirstPoint(shape[after_click],shape[after_click-1]);
             drawLine(shape[after_click-1],shape[after_click]);
